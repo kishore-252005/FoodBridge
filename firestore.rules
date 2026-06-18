@@ -1,0 +1,132 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global fallback deny-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Fetch user details from DB
+    function getUserRole(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data.role;
+    }
+
+    // User shape validator
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'fullName', 'email', 'phone', 'role', 'city', 'area', 'createdAt'])
+        && data.keys().size() == 8
+        && data.uid is string
+        && data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 200
+        && data.email is string && data.email.size() >= 5 && data.email.size() <= 200
+        && data.phone is string && data.phone.size() >= 5 && data.phone.size() <= 30
+        && data.role is string && (data.role == 'Donor' || data.role == 'NGO' || data.role == 'Volunteer' || data.role == 'Admin')
+        && data.city is string && data.city.size() > 0 && data.city.size() <= 100
+        && data.area is string && data.area.size() > 0 && data.area.size() <= 100;
+    }
+
+    // Donation shape validator
+    function isValidDonation(data) {
+      return data.keys().hasAll(['donationId', 'foodName', 'category', 'quantity', 'preparedTime', 'expiryTime', 'pickupAddress', 'description', 'imageUrl', 'donorId', 'donorName', 'status', 'createdAt'])
+        && data.donationId is string
+        && data.foodName is string && data.foodName.size() >= 2 && data.foodName.size() <= 200
+        && data.category is string && data.category.size() > 0 && data.category.size() <= 100
+        && data.quantity is string && data.quantity.size() > 0 && data.quantity.size() <= 100
+        && data.preparedTime is string
+        && data.expiryTime is string
+        && data.pickupAddress is string && data.pickupAddress.size() >= 5 && data.pickupAddress.size() <= 500
+        && data.description is string
+        && data.imageUrl is string
+        && data.donorId is string
+        && data.donorName is string
+        && data.status is string && (data.status == 'Available' || data.status == 'Accepted' || data.status == 'Collected' || data.status == 'Distributed');
+    }
+
+    // Request shape validator
+    function isValidRequest(data) {
+      return data.keys().hasAll(['requestId', 'donationId', 'ngoId', 'volunteerId', 'status', 'createdAt'])
+        && data.requestId is string
+        && data.donationId is string
+        && (data.ngoId == null || data.ngoId is string)
+        && (data.volunteerId == null || data.volunteerId is string)
+        && data.status is string && (data.status == 'Available' || data.status == 'Accepted' || data.status == 'Collected' || data.status == 'Distributed');
+    }
+
+    // 1. Users collection rules
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && (getUserRole(request.auth.uid) == 'Admin');
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) && (
+        // Prevent changing roles directly from client to avoid privilege escalation
+        incoming().role == existing().role
+      );
+      allow delete: if false; // Users cannot be deleted from client directly
+    }
+
+    // 2. Donations collection rules
+    match /donations/{donationId} {
+      // Any signed-in user can view available or claimed donations
+      allow get, list: if isSignedIn();
+      
+      // Only Donors can create donations, and only with their own donorId
+      allow create: if isSignedIn() 
+        && incoming().donorId == request.auth.uid 
+        && getUserRole(request.auth.uid) == 'Donor'
+        && isValidDonation(incoming());
+
+      // Donors can update their own donations (except immutable fields like donorId/createdAt)
+      // NGOs/Volunteers can change status when accepting or updating pickup status
+      allow update: if isSignedIn() && (
+        // Case A: Owner donor updates their donation
+        (existing().donorId == request.auth.uid && incoming().donorId == request.auth.uid && isValidDonation(incoming())) ||
+        // Case B: NGO or Volunteer updates the status field
+        (
+          (getUserRole(request.auth.uid) == 'NGO' || getUserRole(request.auth.uid) == 'Volunteer')
+          && incoming().status != existing().status
+          && incoming().diff(existing()).affectedKeys().hasOnly(['status'])
+        )
+      );
+
+      allow delete: if isSignedIn() && existing().donorId == request.auth.uid && existing().status == 'Available';
+    }
+
+    // 3. Requests collection rules
+    match /requests/{requestId} {
+      allow get, list: if isSignedIn();
+      
+      // Only NGOs and Volunteers can create or update requests
+      allow create: if isSignedIn() 
+        && (getUserRole(request.auth.uid) == 'NGO' || getUserRole(request.auth.uid) == 'Volunteer')
+        && isValidRequest(incoming());
+
+      allow update: if isSignedIn() 
+        && (getUserRole(request.auth.uid) == 'NGO' || getUserRole(request.auth.uid) == 'Volunteer')
+        && isValidRequest(incoming())
+        && (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'ngoId', 'volunteerId']));
+
+      allow delete: if isSignedIn() && (getUserRole(request.auth.uid) == 'Admin' || existing().ngoId == request.auth.uid || existing().volunteerId == request.auth.uid);
+    }
+  }
+}

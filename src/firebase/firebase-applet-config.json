@@ -1,0 +1,10 @@
+{
+  "apiKey": "mock-api-key-foodbridge-12345",
+  "authDomain": "foodbridge-prod.firebaseapp.com",
+  "projectId": "foodbridge-prod",
+  "storageBucket": "foodbridge-prod.appspot.com",
+  "messagingSenderId": "1029384756",
+  "appId": "1:1029384756:web:abcd1234efgh5678",
+  "measurementId": "G-FOODBRIDGE1",
+  "firestoreDatabaseId": "(default)"
+}

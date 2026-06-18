@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-width: 320px;
+  overflow-x: hidden;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@media (max-width: 767px) {
+  #app-authenticated-wrapper {
+    display: block;
+  }
+
+  #app-viewport {
+    min-height: 100vh;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 5.5rem);
+  }
+
+  #donor-dashboard-page,
+  #donation-list-page,
+  #add-donation-page,
+  #donation-details-page,
+  #ngo-dashboard-page,
+  #volunteer-dashboard-page,
+  #admin-dashboard-page {
+    padding: 1rem;
+  }
+
+  #donor-dashboard-page h1,
+  #donation-list-page h1,
+  #add-donation-page h1,
+  #donation-details-page h1,
+  #ngo-dashboard-page h1,
+  #volunteer-dashboard-page h1,
+  #admin-dashboard-page h1 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  #donor-dashboard-page table,
+  #ngo-dashboard-page table,
+  #volunteer-dashboard-page table,
+  #admin-dashboard-page table {
+    min-width: 720px;
+  }
+
+  #add-donation-page form {
+    padding: 1rem;
+  }
+
+  #add-donation-page form input,
+  #add-donation-page form select,
+  #add-donation-page form textarea,
+  #donation-list-page input,
+  #donation-list-page select {
+    font-size: 16px;
+  }
+
+  #details-view-layout {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  #search-filter-layout {
+    gap: 1rem;
+  }
+}
+
+@keyframes slideDownRight {
+  from {
+    transform: translate3d(100%, 0, 0);
+    opacity: 0;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+.animate-toast {
+  animation: slideDownRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

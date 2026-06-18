@@ -1,0 +1,6 @@
+{
+  "name": "FoodBridge",
+  "description": "Smart Food Waste Reduction and Redistribution Platform connecting donors, NGOs, and volunteers",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

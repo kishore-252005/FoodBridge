@@ -1,0 +1,71 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User profile information with role and location",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique user ID matching Auth uid" },
+        "fullName": { "type": "string", "description": "Full name of the user" },
+        "email": { "type": "string", "format": "email", "description": "Email address" },
+        "phone": { "type": "string", "description": "Mobile number" },
+        "role": { "type": "string", "enum": ["Donor", "NGO", "Volunteer", "Admin"] },
+        "city": { "type": "string", "description": "City of operation" },
+        "area": { "type": "string", "description": "Area within the city" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["uid", "fullName", "email", "phone", "role", "city", "area", "createdAt"]
+    },
+    "Donation": {
+      "title": "Food Donation",
+      "description": "A food donation posted by a Donor",
+      "type": "object",
+      "properties": {
+        "donationId": { "type": "string", "description": "Unique ID for the donation" },
+        "foodName": { "type": "string", "description": "Name of the food item" },
+        "category": { "type": "string", "description": "Food category/type" },
+        "quantity": { "type": "string", "description": "Quantity description" },
+        "preparedTime": { "type": "string", "description": "Time of food preparation" },
+        "expiryTime": { "type": "string", "description": "Time of expiry" },
+        "pickupAddress": { "type": "string", "description": "Detailed pickup location" },
+        "description": { "type": "string", "description": "Additional notes" },
+        "imageUrl": { "type": "string", "description": "Stored image URL" },
+        "donorId": { "type": "string", "description": "User ID of the donor" },
+        "donorName": { "type": "string", "description": "Name of the donor" },
+        "status": { "type": "string", "enum": ["Available", "Accepted", "Collected", "Distributed"] },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "city": { "type": "string", "description": "Donor's city" },
+        "area": { "type": "string", "description": "Donor's area" }
+      },
+      "required": ["donationId", "foodName", "category", "quantity", "preparedTime", "expiryTime", "pickupAddress", "donorId", "donorName", "status", "createdAt"]
+    },
+    "Request": {
+      "title": "Donation Request",
+      "description": "Tracking NGOs and Volunteers claiming a donation",
+      "type": "object",
+      "properties": {
+        "requestId": { "type": "string", "description": "Unique ID for the request" },
+        "donationId": { "type": "string", "description": "ID of the associated donation" },
+        "ngoId": { "type": "string", "description": "ID of the NGO (optional if only volunteer)" },
+        "volunteerId": { "type": "string", "description": "ID of the volunteer (optional if only NGO)" },
+        "status": { "type": "string", "enum": ["Available", "Accepted", "Collected", "Distributed"] },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["requestId", "donationId", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles read-only by other registered users unless owner/admin"
+    },
+    "/donations/{donationId}": {
+      "schema": "Donation",
+      "description": "Donations available or accepted/delivered"
+    },
+    "/requests/{requestId}": {
+      "schema": "Request",
+      "description": "Claims made by NGO or volunteer on donations"
+    }
+  }
+}

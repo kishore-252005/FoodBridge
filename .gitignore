@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Android build
+android/app/build/
+android/.gradle/
+android/build/
+android/local.properties
+
+# JDK & Android SDK (downloaded locally)
+jdk/
+android-sdk/
+jdk.zip
+cmdline-tools.zip
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
