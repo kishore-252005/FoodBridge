@@ -1,13 +1,5 @@
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  getDocs, 
-  updateDoc, 
-  query, 
-} from 'firebase/firestore/lite';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, set, get, child, update } from 'firebase/database';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { dbInstance, storageInstance, handleFirestoreError, OperationType } from '../firebase/config';
 import { UserProfile, Donation, RequestRecord, DonationStatus, NotificationItem } from '../types';
 import { messagingService } from './messaging';
@@ -41,14 +33,19 @@ const syncCollectionToLocal = async <T>(key: string, collectionName: string): Pr
   if (!dbInstance) return getLocalData<T>(key);
 
   const snapshot = await withTimeout(
-    getDocs(query(collection(dbInstance, collectionName))),
+    get(child(ref(dbInstance), collectionName)),
     45000,
-    `Firestore list ${collectionName} timed out.`
+    `Realtime DB list ${collectionName} timed out.`
   );
+  
   const list: T[] = [];
-  snapshot.forEach(document => {
-    list.push(document.data() as T);
-  });
+  if (snapshot.exists()) {
+    const data = snapshot.val();
+    Object.keys(data).forEach(docId => {
+      list.push(data[docId] as T);
+    });
+  }
+  
   saveLocalData(key, list);
   return list;
 };
@@ -78,13 +75,12 @@ export const dbService = {
     // 1. Persist locally immediately to keep the registration path responsive.
     upsertLocalItem(USER_KEY, profile, 'uid');
 
-    // 2. Try Firebase Firestore in the background for resilience.
+    // 2. Try Firebase in the background for resilience.
     if (dbInstance) {
       const path = `users/${profile.uid}`;
       void (async () => {
         try {
-          const docRef = doc(dbInstance, 'users', profile.uid);
-          await setDoc(docRef, { ...profile });
+          await set(ref(dbInstance, path), profile);
         } catch (error) {
           try {
             handleFirestoreError(error, OperationType.WRITE, path);
@@ -103,10 +99,9 @@ export const dbService = {
         void (async () => {
           const path = `users/${uid}`;
           try {
-            const docRef = doc(dbInstance, 'users', uid);
-            const snapshot = await withTimeout(getDoc(docRef), 45000, 'Firestore get user profile timed out.');
+            const snapshot = await withTimeout(get(child(ref(dbInstance), path)), 45000, 'DB get user profile timed out.');
             if (snapshot.exists()) {
-              upsertLocalItem(USER_KEY, snapshot.data() as UserProfile, 'uid');
+              upsertLocalItem(USER_KEY, snapshot.val() as UserProfile, 'uid');
             }
           } catch (error) {
             try {
@@ -121,14 +116,9 @@ export const dbService = {
     if (dbInstance) {
       const path = `users/${uid}`;
       try {
-        const docRef = doc(dbInstance, 'users', uid);
-        const snapshot = await withTimeout(
-          getDoc(docRef),
-          45000,
-          'Firestore get user profile timed out.'
-        );
+        const snapshot = await withTimeout(get(child(ref(dbInstance), path)), 45000, 'DB get user profile timed out.');
         if (snapshot.exists()) {
-          const profile = snapshot.data() as UserProfile;
+          const profile = snapshot.val() as UserProfile;
           upsertLocalItem(USER_KEY, profile, 'uid');
           return profile;
         }
@@ -168,7 +158,7 @@ export const dbService = {
       createdAt: new Date().toISOString()
     };
 
-    // Save locally immediately to make the publish action feel fast.
+    // Save locally immediately
     upsertLocalItem(DONATION_KEY, newDonation, 'donationId', true);
 
     // Trigger local push notification logic right away.
@@ -177,25 +167,24 @@ export const dbService = {
     // Broadcast SMS alerts to nearby volunteers in the background
     void messagingService.sendBroadcastToNearbyVolunteers(newDonation);
 
-    // Persist to Firebase in the background to avoid blocking the user.
+    // Persist to Firebase in the background
     if (dbInstance) {
       void (async () => {
         try {
-          if (file) {
+          if (file && storageInstance) {
             try {
-              const storageRef = ref(storageInstance, `donations/${donationId}/${file.name}`);
-              const uploadResult = await withTimeout(uploadBytes(storageRef, file), 45000, 'Firebase Storage upload timed out.');
+              const fileRef = storageRef(storageInstance, `donations/${donationId}/${file.name}`);
+              const uploadResult = await withTimeout(uploadBytes(fileRef, file), 45000, 'Storage upload timed out.');
               imageUrl = await getDownloadURL(uploadResult.ref);
             } catch (uploadError) {
-              console.warn('Firebase Storage upload failed, using offline object URL.', uploadError);
+              console.warn('Storage upload failed, using offline object URL.', uploadError);
               imageUrl = URL.createObjectURL(file);
             }
           }
 
           const donationWithImage: Donation = { ...newDonation, imageUrl };
           const path = `donations/${donationId}`;
-          const docRef = doc(dbInstance, 'donations', donationId);
-          await withTimeout(setDoc(docRef, donationWithImage), 45000, 'Firestore write timed out.');
+          await withTimeout(set(ref(dbInstance, path), donationWithImage), 45000, 'DB write timed out.');
           upsertLocalItem(DONATION_KEY, donationWithImage, 'donationId');
         } catch (error) {
           try {
@@ -217,10 +206,9 @@ export const dbService = {
         void (async () => {
           const path = `donations/${donationId}`;
           try {
-            const docRef = doc(dbInstance, 'donations', donationId);
-            const snapshot = await withTimeout(getDoc(docRef), 45000, 'Firestore get donation timed out.');
+            const snapshot = await withTimeout(get(child(ref(dbInstance), path)), 45000, 'DB get donation timed out.');
             if (snapshot.exists()) {
-              upsertLocalItem(DONATION_KEY, snapshot.data() as Donation, 'donationId');
+              upsertLocalItem(DONATION_KEY, snapshot.val() as Donation, 'donationId');
             }
           } catch (error) {
             try {
@@ -235,10 +223,9 @@ export const dbService = {
     if (dbInstance) {
       const path = `donations/${donationId}`;
       try {
-        const docRef = doc(dbInstance, 'donations', donationId);
-        const snapshot = await withTimeout(getDoc(docRef), 45000, 'Firestore get donation timed out.');
+        const snapshot = await withTimeout(get(child(ref(dbInstance), path)), 45000, 'DB get donation timed out.');
         if (snapshot.exists()) {
-          const donation = snapshot.data() as Donation;
+          const donation = snapshot.val() as Donation;
           upsertLocalItem(DONATION_KEY, donation, 'donationId');
           return donation;
         }
@@ -277,8 +264,7 @@ export const dbService = {
       const path = `donations/${donationId}`;
       void (async () => {
         try {
-          const docRef = doc(dbInstance, 'donations', donationId);
-          await withTimeout(updateDoc(docRef, { status }), 45000, 'Firestore donation status update timed out.');
+          await withTimeout(update(ref(dbInstance, path), { status }), 45000, 'DB donation status update timed out.');
         } catch (error) {
           try {
             handleFirestoreError(error, OperationType.UPDATE, path);
@@ -307,8 +293,7 @@ export const dbService = {
       const path = `requests/${requestId}`;
       void (async () => {
         try {
-          const docRef = doc(dbInstance, 'requests', requestId);
-          await withTimeout(setDoc(docRef, newRequest), 45000, 'Firestore request write timed out.');
+          await withTimeout(set(ref(dbInstance, path), newRequest), 45000, 'DB request write timed out.');
         } catch (error) {
           try {
             handleFirestoreError(error, OperationType.WRITE, path);
@@ -333,11 +318,9 @@ export const dbService = {
     return getLocalData<RequestRecord>(REQUEST_KEY);
   },
 
-  // --- NOTIFICATION SYSTEM (Firebase Cloud Messaging + Browser Fallback) ---
-  // When a donation is created, check users in the same area.
+  // --- NOTIFICATION SYSTEM ---
   sendLocalNotificationForArea(donation: Donation) {
     const users = getLocalData<UserProfile>(USER_KEY);
-    // Find NGOs and Volunteers in same city or area
     const matchedUsers = users.filter(u => 
       (u.role === 'NGO' || u.role === 'Volunteer') && 
       (u.city.toLowerCase() === (donation.city || '').toLowerCase() || 
@@ -347,14 +330,12 @@ export const dbService = {
     const title = "New Food Donation Available";
     const body = `A new food donation has been posted in your area (${donation.area || donation.pickupAddress}).`;
 
-    // 1. Trigger Native HTML5 notification if allowed
     if ('Notification' in window && Notification.permission === 'granted') {
       try {
         new Notification(title, { body, icon: '/assets/favicon.ico' });
       } catch (_) {}
     }
 
-    // 2. Save in app persistent alerts list for matching roles
     const notifications = getLocalData<NotificationItem>(NOTIFICATION_KEY);
     matchedUsers.forEach(user => {
       notifications.unshift({
@@ -399,8 +380,7 @@ export const dbService = {
       const path = `donations/${donationId}/chats/${messageId}`;
       void (async () => {
         try {
-          const docRef = doc(dbInstance, 'donations', donationId, 'chats', messageId);
-          await setDoc(docRef, newMessage);
+          await set(ref(dbInstance, path), newMessage);
         } catch (error) {
           try {
             handleFirestoreError(error, OperationType.WRITE, path);
@@ -415,16 +395,19 @@ export const dbService = {
     
     if (dbInstance) {
       try {
-        const snapshot = await getDocs(query(collection(dbInstance, 'donations', donationId, 'chats')));
+        const snapshot = await get(child(ref(dbInstance), `donations/${donationId}/chats`));
         const list: any[] = [];
-        snapshot.forEach(document => {
-          list.push(document.data());
-        });
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          Object.keys(data).forEach(docId => {
+            list.push(data[docId]);
+          });
+        }
         list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
         saveLocalData(chatKey, list);
         return list;
       } catch (error) {
-        console.warn("Could not sync chats from Firestore, using offline cache", error);
+        console.warn("Could not sync chats from DB, using offline cache", error);
       }
     }
     

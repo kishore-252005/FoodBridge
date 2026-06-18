@@ -1,10 +1,10 @@
 {
   "apiKey": "AIzaSyA5pRaIjFsCV_ojrHMjV8XgCxJpiE_2840",
   "authDomain": "foodbridge-bcd22.firebaseapp.com",
+  "databaseURL": "https://foodbridge-bcd22-default-rtdb.asia-southeast1.firebasedatabase.app",
   "projectId": "foodbridge-bcd22",
   "storageBucket": "foodbridge-bcd22.firebasestorage.app",
   "messagingSenderId": "261384315871",
   "appId": "1:261384315871:web:a40f35817e876422199a6a",
-  "measurementId": "G-MWV63P6H29",
-  "firestoreDatabaseId": "(default)"
+  "measurementId": "G-MWV63P6H29"
 }

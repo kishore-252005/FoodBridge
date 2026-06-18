@@ -1,6 +1,6 @@
 import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore/lite';
+import { getDatabase } from 'firebase/database';
 import { getStorage } from 'firebase/storage';
 import firebaseConfig from './firebase-applet-config.json';
 
@@ -16,27 +16,9 @@ if (!getApps().length) {
   app = getApp();
 }
 
-export const dbInstance = app ? getFirestore(app, firebaseConfig.firestoreDatabaseId) : null;
+export const dbInstance = app ? getDatabase(app) : null;
 export const authInstance = app ? getAuth(app) : null;
 export const storageInstance = app ? getStorage(app) : null;
-
-// Validate Connection to Firestore (from the Firebase Skill)
-export async function testConnection() {
-  if (!dbInstance) return;
-  try {
-    await getDoc(doc(dbInstance, 'test', 'connection'));
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration. Firestore client is offline.");
-    }
-  }
-}
-
-// In case firebase initialization fails, we have our database and auth service fall backs.
-// Call test connection passively.
-if (dbInstance) {
-  testConnection().catch(() => {});
-}
 
 export enum OperationType {
   CREATE = 'create',
