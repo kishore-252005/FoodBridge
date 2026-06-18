@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { Heart, Lock, Mail, AlertCircle, Loader } from 'lucide-react';
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -51,7 +53,7 @@ export default function Login() {
             <Heart className="w-8 h-8 fill-emerald-500 stroke-emerald-600" />
           </div>
           <h1 className="text-2xl font-sans font-bold text-slate-900 tracking-tight">FoodBridge</h1>
-          <p className="text-sm text-slate-500 mt-1.5">Smart Food Waste Reduction and Redistribution</p>
+          <p className="text-sm text-slate-500 mt-1.5">{t('auth.subtitle')}</p>
         </div>
 
         {/* Global Action Alerts */}
@@ -65,7 +67,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Email input */}
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-600 mb-2">Email Address</label>
+            <label className="block text-xs font-semibold uppercase text-slate-600 mb-2">{t('auth.emailLabel')}</label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                 <Mail className="w-4 h-4" />
@@ -75,7 +77,7 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@domain.com"
+                placeholder={t('auth.emailPlaceholder')}
                 className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-850 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
                 disabled={loading}
               />
@@ -84,7 +86,7 @@ export default function Login() {
 
           {/* Password input */}
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-600 mb-2">Password</label>
+            <label className="block text-xs font-semibold uppercase text-slate-600 mb-2">{t('auth.passwordLabel')}</label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                 <Lock className="w-4 h-4" />
@@ -94,7 +96,7 @@ export default function Login() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder={t('auth.passwordPlaceholder')}
                 className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-850 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
                 disabled={loading}
               />
@@ -110,19 +112,19 @@ export default function Login() {
             {loading ? (
               <>
                 <Loader className="w-4 h-4 animate-spin" />
-                <span>Logging into FoodBridge...</span>
+                <span>{t('auth.loggingIn')}</span>
               </>
             ) : (
-              <span>Sign In</span>
+              <span>{t('auth.login')}</span>
             )}
           </button>
         </form>
 
         <div className="text-center mt-6">
           <p className="text-sm text-slate-500">
-            First time redistributing?{' '}
+            {t('auth.noAccount')}{' '}
             <Link to="/register" className="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline">
-              Register now
+              {t('auth.register')}
             </Link>
           </p>
         </div>

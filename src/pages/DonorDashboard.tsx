@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { dbService } from '../services/db';
 import { Donation } from '../types';
 import { PlusCircle, Heart, CheckCircle2, History, ArrowRight, ClipboardList, Clock, AlertTriangle } from 'lucide-react';
 
 export default function DonorDashboard() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [donations, setDonations] = useState<Donation[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,8 +40,8 @@ export default function DonorDashboard() {
       {/* Upper Welcoming Layout */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Donor Hub</h1>
-          <p className="text-slate-500 mt-1">Manage and track your surplus food contributions efficiently</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">{t('donorDashboard.title')}</h1>
+          <p className="text-slate-500 mt-1">{t('donorDashboard.subtitle')}</p>
         </div>
         <Link 
           to="/add-donation" 
@@ -47,7 +49,7 @@ export default function DonorDashboard() {
           id="btn-donor-add-donation"
         >
           <PlusCircle className="w-5 h-5" />
-          Add Donation
+          {t('donorDashboard.addDonationBtn')}
         </Link>
       </div>
 
@@ -57,7 +59,7 @@ export default function DonorDashboard() {
         {/* Total Metric Card */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between" id="metric-total">
           <div>
-            <p className="text-xs uppercase font-bold text-slate-400 block tracking-wider">Total Contributions</p>
+            <p className="text-xs uppercase font-bold text-slate-400 block tracking-wider">{t('donorDashboard.totalContributions')}</p>
             <p className="text-3xl font-bold text-slate-900 mt-2" id="total-count-val">
               {totalDonationsCount}
             </p>
@@ -70,7 +72,7 @@ export default function DonorDashboard() {
         {/* Active Metric Card */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between" id="metric-active">
           <div>
-            <p className="text-xs uppercase font-bold text-slate-400 block tracking-wider font-semibold">Active Items</p>
+            <p className="text-xs uppercase font-bold text-slate-400 block tracking-wider font-semibold">{t('donorDashboard.activeItems')}</p>
             <p className="text-3xl font-bold text-amber-600 mt-2" id="active-count-val">
               {activeDonationsCount}
             </p>
@@ -83,7 +85,7 @@ export default function DonorDashboard() {
         {/* Collected Metric Card */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between" id="metric-collected">
           <div>
-            <p className="text-xs uppercase font-bold text-slate-400 block tracking-wider font-semibold">Ready for Pickup</p>
+            <p className="text-xs uppercase font-bold text-slate-400 block tracking-wider font-semibold">{t('donorDashboard.readyPickup')}</p>
             <p className="text-3xl font-bold text-blue-600 mt-2">
               {collectedDonationsCount}
             </p>
@@ -96,7 +98,7 @@ export default function DonorDashboard() {
         {/* Distributed Metric Card */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between" id="metric-distributed">
           <div>
-            <p className="text-xs uppercase font-bold text-slate-400 block tracking-wider font-semibold">Fully Distributed</p>
+            <p className="text-xs uppercase font-bold text-slate-400 block tracking-wider font-semibold">{t('donorDashboard.fullyDistributed')}</p>
             <p className="text-3xl font-bold text-emerald-600 mt-2">
               {distributedDonationsCount}
             </p>
@@ -111,20 +113,20 @@ export default function DonorDashboard() {
       {/* Grid of Past/Current Donations */}
       <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
         <ClipboardList className="w-5 h-5 text-slate-500" />
-        My Donation Listings
+        {t('donorDashboard.myListings')}
       </h2>
 
       {loading ? (
         <div className="text-center py-12 bg-white rounded-3xl border border-gray-200">
           <Clock className="w-8 h-8 animate-spin text-slate-400 mx-auto mb-3" />
-          <p className="text-sm text-slate-500">Loading donor items...</p>
+          <p className="text-sm text-slate-500">{t('donorDashboard.loading')}</p>
         </div>
       ) : donations.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-3xl border border-gray-200 px-6" id="empty-donor-alert">
           <Heart className="w-12 h-12 text-slate-300 mx-auto mb-3 stroke-1" />
-          <h3 className="text-base font-semibold text-slate-700">No Food Donations Posted</h3>
+          <h3 className="text-base font-semibold text-slate-700">{t('donorDashboard.noDonations')}</h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto mt-2.5">
-            You haven't posted any food surplus listings yet. Click the "Add Donation" button above to share quality nutritious meals.
+            {t('donorDashboard.noDonationsSub')}
           </p>
         </div>
       ) : (
@@ -133,12 +135,12 @@ export default function DonorDashboard() {
             <table className="w-full text-left border-collapse" id="donor-donations-table">
               <thead>
                 <tr className="bg-gray-55 border-b border-gray-100">
-                  <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400 tracking-wider">Food Listing</th>
-                  <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400 tracking-wider">Quantity</th>
-                  <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400 tracking-wider">Expiry timeframe</th>
-                  <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400 tracking-wider">State status</th>
-                  <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400 tracking-wider">Prepared Time</th>
-                  <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400 tracking-wider">Action</th>
+                  <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400 tracking-wider">{t('donorDashboard.table.foodListing')}</th>
+                  <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400 tracking-wider">{t('donorDashboard.table.quantity')}</th>
+                  <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400 tracking-wider">{t('donorDashboard.table.expiry')}</th>
+                  <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400 tracking-wider">{t('donorDashboard.table.status')}</th>
+                  <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400 tracking-wider">{t('donorDashboard.table.prepared')}</th>
+                  <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400 tracking-wider">{t('donorDashboard.table.action')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -190,7 +192,7 @@ export default function DonorDashboard() {
                           item.status === 'Collected' ? 'bg-amber-500' :
                           'bg-slate-500'
                         }`} />
-                        {item.status}
+                        {t(`status.${item.status.toLowerCase()}`)}
                       </span>
                     </td>
                     <td className="py-4 px-6 text-xs text-slate-450 font-mono">
@@ -201,7 +203,7 @@ export default function DonorDashboard() {
                         to={`/donations/${item.donationId}`}
                         className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
                       >
-                        Inspect
+                        {t('donorDashboard.table.inspect')}
                         <ArrowRight className="w-3 h-3" />
                       </Link>
                     </td>

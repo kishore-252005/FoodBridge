@@ -42,7 +42,7 @@ const syncCollectionToLocal = async <T>(key: string, collectionName: string): Pr
 
   const snapshot = await withTimeout(
     getDocs(query(collection(dbInstance, collectionName))),
-    15000,
+    45000,
     `Firestore list ${collectionName} timed out.`
   );
   const list: T[] = [];
@@ -104,7 +104,7 @@ export const dbService = {
           const path = `users/${uid}`;
           try {
             const docRef = doc(dbInstance, 'users', uid);
-            const snapshot = await withTimeout(getDoc(docRef), 15000, 'Firestore get user profile timed out.');
+            const snapshot = await withTimeout(getDoc(docRef), 45000, 'Firestore get user profile timed out.');
             if (snapshot.exists()) {
               upsertLocalItem(USER_KEY, snapshot.data() as UserProfile, 'uid');
             }
@@ -124,7 +124,7 @@ export const dbService = {
         const docRef = doc(dbInstance, 'users', uid);
         const snapshot = await withTimeout(
           getDoc(docRef),
-          15000,
+          45000,
           'Firestore get user profile timed out.'
         );
         if (snapshot.exists()) {
@@ -143,16 +143,6 @@ export const dbService = {
   },
 
   async getAllUsers(): Promise<UserProfile[]> {
-    const localUsers = getLocalData<UserProfile>(USER_KEY);
-    if (localUsers.length > 0) {
-      void syncCollectionToLocal<UserProfile>(USER_KEY, 'users').catch(error => {
-        try {
-          handleFirestoreError(error, OperationType.LIST, 'users');
-        } catch (_) {}
-      });
-      return localUsers;
-    }
-
     if (dbInstance) {
       try {
         return await syncCollectionToLocal<UserProfile>(USER_KEY, 'users');
@@ -194,7 +184,7 @@ export const dbService = {
           if (file) {
             try {
               const storageRef = ref(storageInstance, `donations/${donationId}/${file.name}`);
-              const uploadResult = await withTimeout(uploadBytes(storageRef, file), 15000, 'Firebase Storage upload timed out.');
+              const uploadResult = await withTimeout(uploadBytes(storageRef, file), 45000, 'Firebase Storage upload timed out.');
               imageUrl = await getDownloadURL(uploadResult.ref);
             } catch (uploadError) {
               console.warn('Firebase Storage upload failed, using offline object URL.', uploadError);
@@ -205,7 +195,7 @@ export const dbService = {
           const donationWithImage: Donation = { ...newDonation, imageUrl };
           const path = `donations/${donationId}`;
           const docRef = doc(dbInstance, 'donations', donationId);
-          await withTimeout(setDoc(docRef, donationWithImage), 15000, 'Firestore write timed out.');
+          await withTimeout(setDoc(docRef, donationWithImage), 45000, 'Firestore write timed out.');
           upsertLocalItem(DONATION_KEY, donationWithImage, 'donationId');
         } catch (error) {
           try {
@@ -228,7 +218,7 @@ export const dbService = {
           const path = `donations/${donationId}`;
           try {
             const docRef = doc(dbInstance, 'donations', donationId);
-            const snapshot = await withTimeout(getDoc(docRef), 15000, 'Firestore get donation timed out.');
+            const snapshot = await withTimeout(getDoc(docRef), 45000, 'Firestore get donation timed out.');
             if (snapshot.exists()) {
               upsertLocalItem(DONATION_KEY, snapshot.data() as Donation, 'donationId');
             }
@@ -246,7 +236,7 @@ export const dbService = {
       const path = `donations/${donationId}`;
       try {
         const docRef = doc(dbInstance, 'donations', donationId);
-        const snapshot = await withTimeout(getDoc(docRef), 15000, 'Firestore get donation timed out.');
+        const snapshot = await withTimeout(getDoc(docRef), 45000, 'Firestore get donation timed out.');
         if (snapshot.exists()) {
           const donation = snapshot.data() as Donation;
           upsertLocalItem(DONATION_KEY, donation, 'donationId');
@@ -263,16 +253,6 @@ export const dbService = {
   },
 
   async getAllDonations(): Promise<Donation[]> {
-    const localDonations = getLocalData<Donation>(DONATION_KEY);
-    if (localDonations.length > 0) {
-      void syncCollectionToLocal<Donation>(DONATION_KEY, 'donations').catch(error => {
-        try {
-          handleFirestoreError(error, OperationType.LIST, 'donations');
-        } catch (_) {}
-      });
-      return localDonations;
-    }
-
     if (dbInstance) {
       try {
         return await syncCollectionToLocal<Donation>(DONATION_KEY, 'donations');
@@ -298,7 +278,7 @@ export const dbService = {
       void (async () => {
         try {
           const docRef = doc(dbInstance, 'donations', donationId);
-          await withTimeout(updateDoc(docRef, { status }), 15000, 'Firestore donation status update timed out.');
+          await withTimeout(updateDoc(docRef, { status }), 45000, 'Firestore donation status update timed out.');
         } catch (error) {
           try {
             handleFirestoreError(error, OperationType.UPDATE, path);
@@ -328,7 +308,7 @@ export const dbService = {
       void (async () => {
         try {
           const docRef = doc(dbInstance, 'requests', requestId);
-          await withTimeout(setDoc(docRef, newRequest), 15000, 'Firestore request write timed out.');
+          await withTimeout(setDoc(docRef, newRequest), 45000, 'Firestore request write timed out.');
         } catch (error) {
           try {
             handleFirestoreError(error, OperationType.WRITE, path);
@@ -341,16 +321,6 @@ export const dbService = {
   },
 
   async getAllRequests(): Promise<RequestRecord[]> {
-    const localRequests = getLocalData<RequestRecord>(REQUEST_KEY);
-    if (localRequests.length > 0) {
-      void syncCollectionToLocal<RequestRecord>(REQUEST_KEY, 'requests').catch(error => {
-        try {
-          handleFirestoreError(error, OperationType.LIST, 'requests');
-        } catch (_) {}
-      });
-      return localRequests;
-    }
-
     if (dbInstance) {
       try {
         return await syncCollectionToLocal<RequestRecord>(REQUEST_KEY, 'requests');

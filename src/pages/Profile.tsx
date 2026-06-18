@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { 
   User, 
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 
 export default function Profile() {
+  const { t } = useTranslation();
   const { user, updateProfile, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -41,7 +43,7 @@ export default function Profile() {
       <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 min-h-screen">
         <div className="text-center">
           <Loader className="w-8 h-8 animate-spin text-slate-400 mx-auto mb-3" />
-          <p className="text-sm text-slate-500">Restructuring authentication state...</p>
+          <p className="text-sm text-slate-500">{t('profile.loading')}</p>
         </div>
       </div>
     );
@@ -67,17 +69,17 @@ export default function Profile() {
 
     // --- Validate Fields ---
     if (!fullName.trim() || !phone.trim() || !city.trim() || !area.trim()) {
-      setError('Profile entries cannot be empty.');
+      setError(t('profile.errorEmpty'));
       return;
     }
 
     setLoading(true);
     try {
       await updateProfile(fullName.trim(), phone.trim(), city.trim(), area.trim());
-      setSuccess('Profile details successfully updated!');
+      setSuccess(t('profile.successUpdate'));
       setIsEditing(false);
     } catch (err: any) {
-      setError(err.message || 'Error occurred while updating profile.');
+      setError(err.message || t('profile.errorGeneric'));
     } finally {
       setLoading(false);
     }
@@ -125,7 +127,7 @@ export default function Profile() {
               id="edit-profile-toggle"
               onClick={handleEditToggle}
               className="md:absolute md:top-8 md:right-8 p-3 rounded-xl bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer text-slate-500"
-              title="Edit Profile"
+              title={t('profile.editProfile')}
             >
               {isEditing ? <X className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
             </button>
@@ -152,11 +154,11 @@ export default function Profile() {
         <div className="p-8">
           {isEditing ? (
             <form onSubmit={handleSave} className="space-y-5" id="profile-edit-form">
-              <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2 border-b border-gray-100 pb-3 font-mono">Edit account information</h3>
+              <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2 border-b border-gray-100 pb-3 font-mono">{t('profile.editTitle')}</h3>
               
               {/* Full Name field */}
               <div>
-                <label className="block text-2xs font-bold uppercase text-slate-500 mb-1.5">Full name</label>
+                <label className="block text-2xs font-bold uppercase text-slate-500 mb-1.5">{t('profile.fullName')}</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                     <User className="w-4 h-4" />
@@ -174,7 +176,7 @@ export default function Profile() {
 
               {/* Phone field */}
               <div>
-                <label className="block text-2xs font-bold uppercase text-slate-500 mb-1.5">Mobile Phone</label>
+                <label className="block text-2xs font-bold uppercase text-slate-500 mb-1.5">{t('profile.mobilePhone')}</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                     <Phone className="w-4 h-4" />
@@ -193,7 +195,7 @@ export default function Profile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* City field */}
                 <div>
-                  <label className="block text-2xs font-bold uppercase text-slate-500 mb-1.5">City</label>
+                  <label className="block text-2xs font-bold uppercase text-slate-500 mb-1.5">{t('profile.city')}</label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                       <MapPin className="w-4 h-4" />
@@ -211,7 +213,7 @@ export default function Profile() {
 
                 {/* Area field */}
                 <div>
-                  <label className="block text-2xs font-bold uppercase text-slate-500 mb-1.5">Area / Neighborhood</label>
+                  <label className="block text-2xs font-bold uppercase text-slate-500 mb-1.5">{t('profile.area')}</label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                       <MapPin className="w-4 h-4" />
@@ -239,12 +241,12 @@ export default function Profile() {
                   {loading ? (
                     <>
                       <Loader className="w-3.5 h-3.5 animate-spin" />
-                      <span>Saving profile...</span>
+                      <span>{t('profile.saving')}</span>
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      <span>Save changes</span>
+                      <span>{t('profile.saveChanges')}</span>
                     </>
                   )}
                 </button>
@@ -253,13 +255,13 @@ export default function Profile() {
                   onClick={handleEditToggle}
                   className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-slate-700 text-xs font-semibold rounded-xl flex items-center gap-1.5 cursor-pointer"
                 >
-                  Cancel
+                  {t('profile.cancel')}
                 </button>
               </div>
             </form>
           ) : (
             <div className="space-y-6" id="profile-view-details">
-              <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2 border-b border-gray-100 pb-3 font-mono">Profile Information</h3>
+              <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2 border-b border-gray-100 pb-3 font-mono">{t('profile.infoTitle')}</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
@@ -269,7 +271,7 @@ export default function Profile() {
                     <Mail className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-slate-400 font-bold block uppercase text-[10px] mb-0.5 font-mono">Email Address</span>
+                    <span className="text-slate-400 font-bold block uppercase text-[10px] mb-0.5 font-mono">{t('profile.email')}</span>
                     <span className="font-semibold text-slate-800">{user.email}</span>
                   </div>
                 </div>
@@ -280,8 +282,8 @@ export default function Profile() {
                     <Phone className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-slate-400 font-bold block uppercase text-[10px] mb-0.5 font-mono">Mobile phone</span>
-                    <span className="font-mono text-slate-805 font-bold">{user.phone || 'Not specified'}</span>
+                    <span className="text-slate-400 font-bold block uppercase text-[10px] mb-0.5 font-mono">{t('profile.mobilePhone')}</span>
+                    <span className="font-mono text-slate-805 font-bold">{user.phone || t('profile.notSpecified')}</span>
                   </div>
                 </div>
 
@@ -291,8 +293,8 @@ export default function Profile() {
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-slate-400 font-bold block uppercase text-[10px] mb-0.5 font-mono">Operating City</span>
-                    <span className="font-semibold text-slate-800">{user.city || 'Not specified'}</span>
+                    <span className="text-slate-400 font-bold block uppercase text-[10px] mb-0.5 font-mono">{t('profile.operatingCity')}</span>
+                    <span className="font-semibold text-slate-800">{user.city || t('profile.notSpecified')}</span>
                   </div>
                 </div>
 
@@ -302,14 +304,14 @@ export default function Profile() {
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-slate-400 font-bold block uppercase text-[10px] mb-0.5 font-mono">Neighborhood / Area</span>
-                    <span className="font-semibold text-slate-800">{user.area || 'Not specified'}</span>
+                    <span className="text-slate-400 font-bold block uppercase text-[10px] mb-0.5 font-mono">{t('profile.neighborhood')}</span>
+                    <span className="font-semibold text-slate-800">{user.area || t('profile.notSpecified')}</span>
                   </div>
                 </div>
 
                 {/* Created Date */}
                 <div className="col-span-1 md:col-span-2 pt-4 border-t border-gray-100">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider font-mono">Profile created date</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider font-mono">{t('profile.createdDate')}</span>
                   <span className="text-2xs text-slate-500 font-mono block mt-1">
                     {new Date(user.createdAt).toLocaleString()}
                   </span>
@@ -319,8 +321,8 @@ export default function Profile() {
               {/* Logout Block */}
               <div className="pt-8 border-t border-gray-150 flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold text-slate-800 block uppercase font-mono">End Active session?</span>
-                  <span className="text-2xs text-slate-400 block mt-0.5">Logout from FoodBridge securely. Your listings and logs remain intact.</span>
+                  <span className="text-xs font-bold text-slate-800 block uppercase font-mono">{t('profile.endSession')}</span>
+                  <span className="text-2xs text-slate-400 block mt-0.5">{t('profile.logoutSub')}</span>
                 </div>
                 <button
                   id="btn-logout-inside-profile"
@@ -328,7 +330,7 @@ export default function Profile() {
                   className="px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer transition-colors border border-rose-100 shadow-sm"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span>Logout Account</span>
+                  <span>{t('profile.logoutBtn')}</span>
                 </button>
               </div>
             </div>

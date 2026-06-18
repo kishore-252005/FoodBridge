@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { dbService } from '../services/db';
 import { platformService } from '../services/platform';
@@ -27,6 +28,7 @@ import {
 
 export default function DonationDetails() {
   const { donationId } = useParams<{ donationId: string }>();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -97,7 +99,7 @@ export default function DonationDetails() {
             setDonorProfile(donor);
           }
         } else {
-          setError('We could not find this surplus food listing in our registry database.');
+          setError(t('donationDetails.errorNotFound'));
         }
       } catch (err) {
         console.error("Could not fetch details", err);
@@ -128,7 +130,7 @@ export default function DonationDetails() {
       const isVolunteer = user.role === 'Volunteer';
 
       if (!isNGO && !isVolunteer) {
-        setError('Only registered NGOs or Volunteers can claim or accept donations.');
+        setError(t('donationDetails.onlyRegistered'));
         setActionLoading(false);
         return;
       }
@@ -145,7 +147,7 @@ export default function DonationDetails() {
         setDonation(updatedItem);
       }
 
-      setSuccessMsg('You have successfully accepted/claimed this food donation!');
+      setSuccessMsg(t('donationDetails.successClaim'));
       void platformService.triggerSuccessHaptic();
       setTimeout(() => {
         // Redirect to their respective dashboards
@@ -165,7 +167,7 @@ export default function DonationDetails() {
       <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 min-h-screen">
         <div className="text-center">
           <Loader className="w-8 h-8 animate-spin text-slate-400 mx-auto mb-3" />
-          <p className="text-sm text-slate-500">Querying food listing records...</p>
+          <p className="text-sm text-slate-500">{t('donationDetails.loading')}</p>
         </div>
       </div>
     );
@@ -176,13 +178,13 @@ export default function DonationDetails() {
       <div className="flex-1 bg-gray-50 p-8 min-h-screen">
         <div className="max-w-md mx-auto bg-white p-8 rounded-3xl border border-gray-200 shadow-sm text-center mt-12">
           <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto mb-4" />
-          <h2 className="text-lg font-bold text-slate-800">Resource Mismatch</h2>
-          <p className="text-xs text-slate-500 mt-2">{error || "This food logs could not be loaded."}</p>
+          <h2 className="text-lg font-bold text-slate-800">{t('donationDetails.errorMismatch')}</h2>
+          <p className="text-xs text-slate-500 mt-2">{error || t('donationDetails.errorNotFound')}</p>
           <button 
             onClick={() => navigate('/donations')} 
             className="mt-6 px-4 py-2 bg-slate-900 border border-slate-950 text-white rounded-xl text-xs font-semibold cursor-pointer"
           >
-            Go Back
+            {t('donationDetails.goBack')}
           </button>
         </div>
       </div>
@@ -206,8 +208,8 @@ export default function DonationDetails() {
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900">Surplus Log Details</h1>
-              <span className="text-[10px] text-slate-400 font-mono">Reference PK ID: {donation.donationId}</span>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900">{t('donationDetails.title')}</h1>
+              <span className="text-[10px] text-slate-400 font-mono">{t('donationDetails.refId')} {donation.donationId}</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -217,7 +219,7 @@ export default function DonationDetails() {
               title="Share Listing"
             >
               <Share2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Share</span>
+              <span className="hidden sm:inline">{t('donationDetails.share')}</span>
             </button>
             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono border ${
               donation.status === 'Available' ? 'bg-emerald-50 text-emerald-800 border-emerald-100' :
@@ -226,7 +228,7 @@ export default function DonationDetails() {
               'bg-gray-50 text-slate-600 border-gray-150'
             }`}>
               <span className="w-1.5 h-1.5 rounded-full bg-current" />
-              {donation.status}
+              {t(`status.${donation.status.toLowerCase()}`)}
             </span>
           </div>
         </div>
@@ -260,7 +262,7 @@ export default function DonationDetails() {
               ) : (
                 <div className="text-center p-6 text-slate-400 font-mono text-xs">
                   <Heart className="w-12 h-12 text-emerald-500 mx-auto mb-2 fill-emerald-50" />
-                  <span>No media uploaded for this surplus food</span>
+                  <span>{t('donationDetails.noMedia')}</span>
                 </div>
               )}
             </div>
@@ -269,10 +271,10 @@ export default function DonationDetails() {
             <div className="bg-gray-50/75 p-6 rounded-2xl border border-gray-200">
               <h3 className="text-xs uppercase font-bold text-slate-400 flex items-center gap-2 mb-3 tracking-wider font-mono">
                 <BookOpen className="w-4 h-4 text-emerald-500" />
-                Special instructions (Storage / Temperature)
+                {t('donationDetails.instructionsTitle')}
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap">
-                {donation.description || "The donor did not provide any extra notes or specifics for this food listing."}
+                {donation.description || t('donationDetails.noInstructions')}
               </p>
             </div>
           </div>
@@ -281,19 +283,19 @@ export default function DonationDetails() {
           <div className="space-y-6">
             {/* Surplus Food Info Block */}
             <div className="border border-gray-200 rounded-2xl p-6 space-y-4">
-              <h3 className="text-sm font-bold text-slate-800 font-sans tracking-tight border-b border-gray-100 pb-3 uppercase tracking-wider font-mono">Food Description</h3>
+              <h3 className="text-sm font-bold text-slate-800 font-sans tracking-tight border-b border-gray-100 pb-3 uppercase tracking-wider font-mono">{t('donationDetails.foodDescTitle')}</h3>
               
               <div className="space-y-2.5">
                 <div className="flex items-center text-xs">
-                  <span className="text-slate-400 font-medium w-24">Food Name:</span>
+                  <span className="text-slate-400 font-medium w-24">{t('donationDetails.foodName')}</span>
                   <span className="text-slate-800 font-bold">{donation.foodName}</span>
                 </div>
                 <div className="flex items-center text-xs">
-                  <span className="text-slate-400 font-medium w-24">Category:</span>
-                  <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full font-mono text-[10px] uppercase font-bold border border-slate-200">{donation.category}</span>
+                  <span className="text-slate-400 font-medium w-24">{t('donationDetails.category')}</span>
+                  <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full font-mono text-[10px] uppercase font-bold border border-slate-200">{t(`categories.${donation.category.toLowerCase()}`, donation.category)}</span>
                 </div>
                 <div className="flex items-center text-xs">
-                  <span className="text-slate-400 font-medium w-24">Quantity:</span>
+                  <span className="text-slate-400 font-medium w-24">{t('donationDetails.quantity')}</span>
                   <span className="text-slate-800 font-semibold">{donation.quantity}</span>
                 </div>
               </div>
@@ -302,25 +304,25 @@ export default function DonationDetails() {
             {/* Delivery / Safety Timestamp Block */}
             <div className="border border-gray-200 rounded-2xl p-6 space-y-4">
               <h3 className="text-sm font-bold text-slate-800 font-sans tracking-tight border-b border-gray-100 pb-3 flex items-center gap-1.5 uppercase tracking-wider font-mono">
-                <Clock className="w-4 h-4 text-amber-500" /> Timing Intervals
+                <Clock className="w-4 h-4 text-amber-500" /> {t('donationDetails.timingTitle')}
               </h3>
               
               <div className="space-y-2.5 text-xs text-slate-600">
                 <div className="flex items-center">
                   <span className="text-slate-400 font-medium w-28 flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" /> Prepared:
+                    <Calendar className="w-3.5 h-3.5" /> {t('donationDetails.prepared')}
                   </span>
                   <span className="font-semibold text-slate-800">{new Date(donation.preparedTime).toLocaleString()}</span>
                 </div>
                 <div className="flex items-center">
                   <span className="text-slate-400 font-medium w-28 flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5" /> Expires:
+                    <Clock className="w-3.5 h-3.5" /> {t('donationDetails.expires')}
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-slate-800">{new Date(donation.expiryTime).toLocaleString()}</span>
                     {isExpired && (
                       <span className="bg-rose-50 text-rose-700 px-2 py-0.5 rounded font-mono font-bold border border-rose-100">
-                        EXPIRED
+                        {t('donationDetails.expired')}
                       </span>
                     )}
                   </div>
@@ -330,11 +332,11 @@ export default function DonationDetails() {
 
             {/* Donor & Pickup location Info Blocks */}
             <div className="border border-gray-200 rounded-2xl p-6 space-y-4">
-              <h3 className="text-sm font-bold text-slate-800 font-sans tracking-tight border-b border-gray-100 pb-3 uppercase tracking-wider font-mono">Donor & Location</h3>
+              <h3 className="text-sm font-bold text-slate-800 font-sans tracking-tight border-b border-gray-100 pb-3 uppercase tracking-wider font-mono">{t('donationDetails.donorLocTitle')}</h3>
               
               <div className="space-y-3 text-xs text-slate-650">
                 <div className="flex items-center">
-                  <span className="text-slate-400 font-medium w-24">Donor Name:</span>
+                  <span className="text-slate-400 font-medium w-24">{t('donationDetails.donorName')}</span>
                   <span className="font-semibold text-slate-800 flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-slate-400" />
                     {donation.donorName}
@@ -343,7 +345,7 @@ export default function DonationDetails() {
 
                 {donorProfile?.phone && (
                   <div className="flex items-center">
-                    <span className="text-slate-400 font-medium w-24">Mobile Phone:</span>
+                    <span className="text-slate-400 font-medium w-24">{t('donationDetails.mobilePhone')}</span>
                     <span className="font-mono text-slate-850 font-bold flex items-center gap-1.5">
                       <Phone className="w-3.5 h-3.5 text-emerald-500" />
                       {donorProfile.phone}
@@ -352,7 +354,7 @@ export default function DonationDetails() {
                 )}
 
                 <div className="flex items-start">
-                  <span className="text-slate-400 font-medium w-24 shrink-0">Pickup:</span>
+                  <span className="text-slate-400 font-medium w-24 shrink-0">{t('donationDetails.pickup')}</span>
                   <span className="font-medium text-slate-800 flex items-start gap-1.5 leading-relaxed">
                     <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
                     {donation.pickupAddress}
@@ -364,7 +366,7 @@ export default function DonationDetails() {
             {/* Coordinate Pickup Messenger */}
             {donorProfile && user && user.uid !== donation.donorId && (
               <div className="border border-gray-205 rounded-2xl p-6 space-y-4 bg-gray-50/50">
-                <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider font-mono">Coordinate Pickup</h3>
+                <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider font-mono">{t('donationDetails.coordPickupTitle')}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   
                   {/* WhatsApp */}
@@ -411,15 +413,15 @@ export default function DonationDetails() {
               <div className="border border-gray-205 rounded-2xl p-6 bg-white shadow-sm space-y-4">
                 <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wider font-mono">
                   <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
-                  Coordination Chat Channel
+                  {t('donationDetails.chatTitle')}
                 </h3>
                 
                 {/* Scrollable Message history block */}
                 <div className="h-60 overflow-y-auto border border-gray-150 rounded-2xl p-4 bg-gray-50/50 space-y-3 flex flex-col" id="chat-messages-container">
                   {messages.length === 0 ? (
                     <div className="text-center text-slate-450 text-2xs py-16 flex-1 flex flex-col justify-center">
-                      <span>No messages in this coordination channel yet.</span>
-                      <span>Send a message below to start planning pickup logistics!</span>
+                      <span>{t('donationDetails.noMessages1')}</span>
+                      <span>{t('donationDetails.noMessages2')}</span>
                     </div>
                   ) : (
                     messages.map((msg) => {
@@ -452,14 +454,14 @@ export default function DonationDetails() {
                     type="text"
                     value={newMessageText}
                     onChange={(e) => setNewMessageText(e.target.value)}
-                    placeholder="Type coordination message..."
+                    placeholder={t('donationDetails.typeMessage')}
                     className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-slate-850 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
                   />
                   <button
                     type="submit"
                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl cursor-pointer transition-colors shadow-md shadow-emerald-500/10"
                   >
-                    Send
+                    {t('donationDetails.send')}
                   </button>
                 </form>
               </div>
@@ -468,9 +470,9 @@ export default function DonationDetails() {
             {/* Action Segment - NGO / Volunteer Accepting Claims */}
             {donation.status === 'Available' && !isExpired && user && (user.role === 'NGO' || user.role === 'Volunteer') && (
               <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 space-y-2.5">
-                <h4 className="text-xs font-bold uppercase text-emerald-800 tracking-wider">Accept Excess Food Listing</h4>
+                <h4 className="text-xs font-bold uppercase text-emerald-800 tracking-wider">{t('donationDetails.acceptTitle')}</h4>
                 <p className="text-2xs text-emerald-600 leading-relaxed mb-3">
-                  Claiming this donation locks the status to **Accepted**. This will communicate with the Donor that you ({user.fullName}) will navigate to '{donation.pickupAddress}' to coordinate package logistics.
+                  {t('donationDetails.acceptDesc')}
                 </p>
                 <button
                   id="btn-accept-donation"
@@ -481,12 +483,12 @@ export default function DonationDetails() {
                   {actionLoading ? (
                     <>
                       <Loader className="w-3.5 h-3.5 animate-spin" />
-                      <span>Locking Claim Status...</span>
+                      <span>{t('donationDetails.locking')}</span>
                     </>
                   ) : (
                     <>
                       {user.role === 'NGO' ? <Building className="w-4 h-4" /> : <Truck className="w-4 h-4" />}
-                      <span>Accept Donation Listing</span>
+                      <span>{t('donationDetails.acceptListing')}</span>
                     </>
                   )}
                 </button>
@@ -497,8 +499,8 @@ export default function DonationDetails() {
             {isExpired && (
               <div className="bg-rose-50 border border-rose-100 rounded-2xl p-6 text-center text-rose-800">
                 <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto mb-2 animate-bounce-slow" />
-                <h4 className="text-xs font-bold uppercase tracking-wider">LISTING EXPIRED</h4>
-                <p className="text-2xs text-rose-600 mt-1">This surplus food listing is expired and cannot be accepted or collected further.</p>
+                <h4 className="text-xs font-bold uppercase tracking-wider">{t('donationDetails.expiredTitle')}</h4>
+                <p className="text-2xs text-rose-600 mt-1">{t('donationDetails.expiredDesc')}</p>
               </div>
             )}
 

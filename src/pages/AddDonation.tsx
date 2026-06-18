@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { dbService } from '../services/db';
 import { platformService } from '../services/platform';
 import { 
@@ -20,6 +21,7 @@ import {
 export default function AddDonation() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [foodName, setFoodName] = useState('');
   const [category, setCategory] = useState('Cooked Meal');
@@ -161,8 +163,8 @@ export default function AddDonation() {
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900">Post Surplus Food</h1>
-              <p className="text-xs text-slate-500 mt-0.5">Share premium quality meal resources with volunteer associations</p>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900">{t('addDonation.title')}</h1>
+              <p className="text-xs text-slate-500 mt-0.5">{t('addDonation.subtitle')}</p>
             </div>
           </div>
           <Heart className="w-5 h-5 text-emerald-500 fill-emerald-50" />
@@ -179,7 +181,7 @@ export default function AddDonation() {
         {success && (
           <div className="m-6 p-4 bg-emerald-50 border border-emerald-150 text-emerald-800 rounded-2xl flex items-start gap-3 text-xs animate-fade-in" id="add-donation-success">
             <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 mt-0.5" />
-            <p className="font-semibold">Donation posted successfully! Informing matched area volunteers...</p>
+            <p className="font-semibold">{t('addDonation.successMsg')}</p>
           </div>
         )}
 
@@ -188,7 +190,7 @@ export default function AddDonation() {
             {/* Food Name */}
             <div>
               <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                Food Name <span className="text-rose-500">*</span>
+                {t('addDonation.foodName')} <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
@@ -200,7 +202,7 @@ export default function AddDonation() {
                   required
                   value={foodName}
                   onChange={(e) => setFoodName(e.target.value)}
-                  placeholder="e.g. Freshly packed lentil wraps & soup"
+                  placeholder={t('addDonation.foodNamePlaceholder')}
                   className="w-full pl-10 pr-4 py-2.5 bg-gray-50/75 border border-gray-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
                 />
               </div>
@@ -209,7 +211,7 @@ export default function AddDonation() {
             {/* Food Category */}
             <div>
               <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                Food Category <span className="text-rose-500">*</span>
+                {t('addDonation.foodCategory')} <span className="text-rose-500">*</span>
               </label>
               <select
                 id="add-category"
@@ -228,7 +230,7 @@ export default function AddDonation() {
             {/* Quantity */}
             <div>
               <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                Quantity & Servings <span className="text-rose-500">*</span>
+                {t('addDonation.quantity')} <span className="text-rose-500">*</span>
               </label>
               <input
                 id="add-quantity"
@@ -236,7 +238,7 @@ export default function AddDonation() {
                 required
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                placeholder="e.g. 12 packages / 4 kg"
+                placeholder={t('addDonation.quantityPlaceholder')}
                 className="w-full px-4 py-2.5 bg-gray-50/75 border border-gray-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
               />
             </div>
@@ -244,7 +246,7 @@ export default function AddDonation() {
             {/* Pickup Address */}
             <div>
               <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                Pickup Address <span className="text-rose-500">*</span>
+                {t('addDonation.pickupAddress')} <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
@@ -256,7 +258,7 @@ export default function AddDonation() {
                   required
                   value={pickupAddress}
                   onChange={(e) => setPickupAddress(e.target.value)}
-                  placeholder="Building No, Street state Landmark"
+                  placeholder={t('addDonation.pickupAddressPlaceholder')}
                   className="w-full pl-10 pr-4 py-2.5 bg-gray-50/75 border border-gray-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
                 />
               </div>
@@ -267,7 +269,7 @@ export default function AddDonation() {
             {/* Prepared Time */}
             <div>
               <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                Prepared Time <span className="text-rose-500">*</span>
+                {t('addDonation.preparedTime')} <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
@@ -287,7 +289,7 @@ export default function AddDonation() {
             {/* Expiry Time */}
             <div>
               <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-                Expiry Time <span className="text-rose-500">*</span>
+                {t('addDonation.expiryTime')} <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
@@ -307,20 +309,20 @@ export default function AddDonation() {
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">Specific Instructions</label>
+            <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">{t('addDonation.instructions')}</label>
             <textarea
               id="add-description"
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Provide temperature requirements, allergens details or guidelines for pick-up agents here..."
+              placeholder={t('addDonation.instructionsPlaceholder')}
               className="w-full px-4 py-3 bg-gray-50/75 border border-gray-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all resize-none"
             />
           </div>
 
           {/* Upload Food Image */}
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">Illustrative Food Image</label>
+            <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5">{t('addDonation.image')}</label>
             <div 
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -350,13 +352,13 @@ export default function AddDonation() {
                       referrerPolicy="no-referrer"
                       className="max-h-36 rounded-xl object-contain border border-gray-100 mb-2 shadow-sm" 
                     />
-                    <span className="text-2xs text-emerald-600 font-semibold block mt-1">Image loaded successfully. Click to replace.</span>
+                    <span className="text-2xs text-emerald-600 font-semibold block mt-1">{t('addDonation.imageLoaded')}</span>
                   </div>
                 ) : (
                   <>
                     <Upload className="w-8 h-8 text-slate-400 mb-2" />
-                    <span className="text-slate-700 font-semibold block">Click to select or drag & drop image illustration</span>
-                    <span className="text-slate-400 mt-1 block">Compatible standard formats: JPEG, PNG, WEBP</span>
+                    <span className="text-slate-700 font-semibold block">{t('addDonation.imageDrop')}</span>
+                    <span className="text-slate-400 mt-1 block">{t('addDonation.imageFormats')}</span>
                   </>
                 )}
               </label>
@@ -372,10 +374,10 @@ export default function AddDonation() {
             {loading ? (
               <>
                 <Loader className="w-4 h-4 animate-spin" />
-                <span>Publishing Food Listing...</span>
+                <span>{t('addDonation.publishing')}</span>
               </>
             ) : (
-              <span>Publish Listing</span>
+              <span>{t('addDonation.publishBtn')}</span>
             )}
           </button>
         </form>

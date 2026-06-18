@@ -8,16 +8,19 @@ import {
   LogOut, 
   Shield, 
   Bell, 
-  Heart, 
+  Heart,
   Truck,
   Building
 } from 'lucide-react';
+import LanguageSwitcher from './LanguageSwitcher';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export default function Sidebar() {
   const { user, logout, notifications, markNotificationsAsRead } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
+  const { t } = useTranslation();
 
   if (!user) return null;
 
@@ -50,13 +53,16 @@ export default function Sidebar() {
     <>
     <aside className="w-64 flex-shrink-0 border-r border-gray-200 bg-white hidden md:flex flex-col min-h-screen" id="app-sidebar">
       {/* Brand Header */}
-      <div className="p-6 flex items-center gap-3">
-        <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center shrink-0">
-          <svg className="w-5 h-5 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-          </svg>
+      <div className="p-6 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center shrink-0">
+            <svg className="w-5 h-5 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <span className="font-bold text-xl tracking-tight text-slate-800">{t('sidebar.title')}</span>
         </div>
-        <span className="font-bold text-xl tracking-tight text-slate-800">FoodBridge</span>
+        <LanguageSwitcher />
       </div>
 
       {/* Navigation Links */}
@@ -68,7 +74,7 @@ export default function Sidebar() {
           className={navLinkClass}
         >
           <Home className="w-5 h-5" />
-          Dashboard
+          {t('sidebar.dashboard')}
         </NavLink>
 
         {/* Donor Links */}
@@ -78,7 +84,7 @@ export default function Sidebar() {
             className={navLinkClass}
           >
             <PlusCircle className="w-5 h-5" />
-            Add Donation
+            {t('sidebar.addDonation')}
           </NavLink>
         )}
 
@@ -88,7 +94,7 @@ export default function Sidebar() {
           className={navLinkClass}
         >
           <List className="w-5 h-5" />
-          Browse Donations
+          {t('sidebar.history')}
         </NavLink>
 
         {/* Profile Link */}
@@ -97,7 +103,7 @@ export default function Sidebar() {
           className={navLinkClass}
         >
           <User className="w-5 h-5" />
-          My Profile
+          {t('sidebar.profile')}
         </NavLink>
 
         {/* Administration Links */}
@@ -205,7 +211,7 @@ export default function Sidebar() {
           id="btn-logout-sidebar"
         >
           <LogOut className="w-4 h-4" />
-          <span>Exit Session</span>
+          <span>{t('sidebar.logout')}</span>
         </button>
       </div>
     </aside>

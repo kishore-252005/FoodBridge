@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { dbService } from '../services/db';
 import { Donation, RequestRecord, UserProfile } from '../types';
 import { 
@@ -21,6 +22,7 @@ import {
 
 export default function VolunteerDashboard() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [allDonations, setAllDonations] = useState<Donation[]>([]);
   const [allRequests, setAllRequests] = useState<RequestRecord[]>([]);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
@@ -53,7 +55,7 @@ export default function VolunteerDashboard() {
   // Update status flows
   const handleAcceptCargo = async (donationId: string) => {
     if (!user) {
-      setActionError('You must be signed in as a volunteer to accept cargo.');
+      setActionError(t('volunteerDashboard.errorAuth'));
       return;
     }
 
@@ -68,7 +70,7 @@ export default function VolunteerDashboard() {
       ));
     } catch (err: any) {
       console.error('Cargo claim failed', err);
-      setActionError(err?.message || 'Unable to accept cargo. Please try again.');
+      setActionError(err?.message || t('volunteerDashboard.errorAccept'));
     } finally {
       setActionLoading(null);
     }
@@ -96,7 +98,7 @@ export default function VolunteerDashboard() {
       await loadWorkspaceData();
     } catch (err: any) {
       console.error("Status state transition failed", err);
-      setActionError(err?.message || 'Unable to update shipment status.');
+      setActionError(err?.message || t('volunteerDashboard.errorStatus'));
     } finally {
       setActionLoading(null);
     }
@@ -107,7 +109,7 @@ export default function VolunteerDashboard() {
       <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 min-h-screen">
         <div className="text-center">
           <Loader className="w-8 h-8 animate-spin text-slate-400 mx-auto mb-3" />
-          <p className="text-sm text-slate-500">Querying assigned delivery tasks...</p>
+          <p className="text-sm text-slate-500">{t('volunteerDashboard.loading')}</p>
         </div>
       </div>
     );
@@ -136,8 +138,8 @@ export default function VolunteerDashboard() {
     <div className="flex-1 bg-gray-50 p-8" id="volunteer-dashboard-page">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Volunteer Operations</h1>
-          <p className="text-slate-500 mt-1">Acquire pickups, route cargo, and deliver nutritious surplus food to NGO sites</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">{t('volunteerDashboard.title')}</h1>
+          <p className="text-slate-500 mt-1">{t('volunteerDashboard.subtitle')}</p>
         </div>
       </div>
 
@@ -150,14 +152,14 @@ export default function VolunteerDashboard() {
           <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm" id="assigned-pickups-panel">
             <h2 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-gray-100 pb-3">
               <Truck className="w-5 h-5 text-amber-500" />
-              Active Shipping Tasks ({assignedPickups.length})
+              {t('volunteerDashboard.activeTasks')} ({assignedPickups.length})
             </h2>
 
             {assignedPickups.length === 0 ? (
               <div className="text-center py-12 px-6">
                 <Package className="w-10 h-10 text-slate-300 mx-auto mb-3" />
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  No active pick-up logs found. Review and claim food packages waiting in the sidebar feed on your right.
+                  {t('volunteerDashboard.noActiveTasks')}
                 </p>
               </div>
             ) : (
@@ -169,31 +171,31 @@ export default function VolunteerDashboard() {
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-gray-100 pb-3 mb-3">
                         <div>
                           <h3 className="text-sm font-bold text-slate-800">{item.foodName}</h3>
-                          <span className="text-[10px] font-mono text-slate-400">EXPIRY: {new Date(item.expiryTime).toLocaleString()}</span>
+                          <span className="text-[10px] font-mono text-slate-400">{t('volunteerDashboard.expiry')}: {new Date(item.expiryTime).toLocaleString()}</span>
                         </div>
                         <span className={`px-2.5 py-1 rounded-full text-2xs font-bold font-mono border ${
                           item.status === 'Accepted' ? 'bg-blue-50 text-blue-700 border-blue-105' : 'bg-amber-50 text-amber-800 border-amber-105'
                         }`}>
-                          {item.status}
+                          {t(`status.${item.status.toLowerCase()}`)}
                         </span>
                       </div>
 
                       <div className="space-y-2 text-xs text-slate-650 mb-4">
                         <p className="flex items-center gap-1.5 leading-snug">
                           <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>Pickup: <strong>{item.pickupAddress}</strong> ({item.area}, {item.city})</span>
+                          <span>{t('volunteerDashboard.pickup')} <strong>{item.pickupAddress}</strong> ({item.area}, {item.city})</span>
                         </p>
                         <p className="flex items-center gap-1.5">
                           <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>Donor Contact: {item.donorName}</span>
+                          <span>{t('volunteerDashboard.donorContact')} {item.donorName}</span>
                         </p>
                         <p className="flex items-center gap-1.5">
                           <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>Donor Mobile: <strong>{donorProfile?.phone || 'Not available'}</strong></span>
+                          <span>{t('volunteerDashboard.donorMobile')} <strong>{donorProfile?.phone || t('volunteerDashboard.notAvailable')}</strong></span>
                         </p>
                         <p className="flex items-center gap-1.5">
                           <Package className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>Payload Quantity: {item.quantity}</span>
+                          <span>{t('volunteerDashboard.quantity')} {item.quantity}</span>
                         </p>
                       </div>
 
@@ -209,12 +211,12 @@ export default function VolunteerDashboard() {
                             {actionLoading === item.donationId ? (
                               <>
                                 <Loader className="w-3.5 h-3.5 animate-spin" />
-                                <span>Updating...</span>
+                                <span>{t('volunteerDashboard.updating')}</span>
                               </>
                             ) : (
                               <>
                                 <Package className="w-4 h-4" />
-                                <span>Confirm Package Collected</span>
+                                <span>{t('volunteerDashboard.confirmCollect')}</span>
                               </>
                             )}
                           </button>
@@ -230,12 +232,12 @@ export default function VolunteerDashboard() {
                             {actionLoading === item.donationId ? (
                               <>
                                 <Loader className="w-3.5 h-3.5 animate-spin" />
-                                <span>Updating...</span>
+                                <span>{t('volunteerDashboard.updating')}</span>
                               </>
                             ) : (
                               <>
                                 <CheckCircle2 className="w-4 h-4" />
-                                <span>Deliver to Destination Site</span>
+                                <span>{t('volunteerDashboard.deliver')}</span>
                               </>
                             )}
                           </button>
@@ -247,7 +249,7 @@ export default function VolunteerDashboard() {
                           id={`btn-chat-${item.donationId}`}
                         >
                           <MessageSquare className="w-4 h-4" />
-                          <span>Open Chat & Info</span>
+                          <span>{t('volunteerDashboard.openChat')}</span>
                         </Link>
                       </div>
                     </div>
@@ -261,22 +263,22 @@ export default function VolunteerDashboard() {
           <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm" id="completed-deliveries-panel">
             <h2 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-gray-100 pb-3">
               <ClipboardCheck className="w-5 h-5 text-emerald-600" />
-              Completed Shipments Log ({completedDeliveries.length})
+              {t('volunteerDashboard.completedLog')} ({completedDeliveries.length})
             </h2>
 
             {completedDeliveries.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-xs text-slate-400">No completed items logged yet.</p>
+                <p className="text-xs text-slate-400">{t('volunteerDashboard.noCompleted')}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-600 border-collapse">
                   <thead>
                     <tr className="border-b border-gray-100 bg-gray-50 text-[11px] text-slate-400 font-bold uppercase tracking-wider">
-                      <th className="py-3 px-4 font-semibold">Food Description</th>
-                      <th className="py-3 px-4 font-semibold">Quantity</th>
-                      <th className="py-3 px-4 font-semibold">Original Donor</th>
-                      <th className="py-3 px-4 font-semibold">Delivery Time</th>
+                      <th className="py-3 px-4 font-semibold">{t('volunteerDashboard.table.foodDesc')}</th>
+                      <th className="py-3 px-4 font-semibold">{t('volunteerDashboard.table.quantity')}</th>
+                      <th className="py-3 px-4 font-semibold">{t('volunteerDashboard.table.donor')}</th>
+                      <th className="py-3 px-4 font-semibold">{t('volunteerDashboard.table.deliveryTime')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -302,16 +304,16 @@ export default function VolunteerDashboard() {
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm self-start" id="volunteer-claim-center">
           <h2 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-gray-100 pb-3">
             <Heart className="w-4 h-4 text-emerald-600" />
-            Claim Area Shipments
+            {t('volunteerDashboard.claimCenter')}
           </h2>
           <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-            The following food donations have been verified. Accept transport to route cargo safely.
+            {t('volunteerDashboard.claimSub')}
           </p>
 
           {availableItemsToClaim.length === 0 ? (
             <div className="text-center py-10">
               <Package className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-xs text-slate-400">All local food surplus has been accounted for!</p>
+              <p className="text-xs text-slate-400">{t('volunteerDashboard.noSurplus')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -329,7 +331,7 @@ export default function VolunteerDashboard() {
                     </p>
                     <p className="flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span>Expires: {new Date(item.expiryTime).toLocaleDateString()}</span>
+                      <span>{t('volunteerDashboard.expires')} {new Date(item.expiryTime).toLocaleDateString()}</span>
                     </p>
                   </div>
 
@@ -342,10 +344,10 @@ export default function VolunteerDashboard() {
                     {actionLoading === item.donationId ? (
                       <span className="flex items-center justify-center gap-2">
                         <Loader className="w-3.5 h-3.5 animate-spin" />
-                        Processing...
+                        {t('volunteerDashboard.processing')}
                       </span>
                     ) : (
-                      'Accept Cargo'
+                      t('volunteerDashboard.acceptCargo')
                     )}
                   </button>
                 </div>

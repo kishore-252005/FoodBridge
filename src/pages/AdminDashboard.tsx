@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { dbService } from '../services/db';
 import { Donation, UserProfile } from '../types';
 import { 
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminDashboard() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [donations, setDonations] = useState<Donation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +50,7 @@ export default function AdminDashboard() {
       <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 min-h-screen">
         <div className="text-center">
           <Loader className="w-8 h-8 animate-spin text-slate-400 mx-auto mb-3" />
-          <p className="text-sm text-slate-500">Querying platform general state records...</p>
+          <p className="text-sm text-slate-500">{t('adminDashboard.loading')}</p>
         </div>
       </div>
     );
@@ -128,9 +130,9 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
             <Shield className="w-8 h-8 text-emerald-600" />
-            Admin Control Center
+            {t('adminDashboard.title')}
           </h1>
-          <p className="text-slate-500 mt-1">Real-time statistics, data visualization, and community audit trail.</p>
+          <p className="text-slate-500 mt-1">{t('adminDashboard.subtitle')}</p>
         </div>
       </div>
 
@@ -140,7 +142,7 @@ export default function AdminDashboard() {
         {/* Total Users */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold uppercase text-slate-400 block tracking-wider">Active Members</p>
+            <p className="text-xs font-bold uppercase text-slate-400 block tracking-wider">{t('adminDashboard.metrics.activeMembers')}</p>
             <p className="text-3xl font-bold text-slate-900 mt-2" id="admin-count-users">
               {totalUsersCount}
             </p>
@@ -153,7 +155,7 @@ export default function AdminDashboard() {
         {/* Total Donations */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold uppercase text-slate-400 block tracking-wider">Total Listings</p>
+            <p className="text-xs font-bold uppercase text-slate-400 block tracking-wider">{t('adminDashboard.metrics.totalListings')}</p>
             <p className="text-3xl font-bold text-slate-900 mt-2" id="admin-count-donations">
               {totalDonationsCount}
             </p>
@@ -166,7 +168,7 @@ export default function AdminDashboard() {
         {/* Distribution Completion */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold uppercase text-slate-400 block tracking-wider">Completion Rate</p>
+            <p className="text-xs font-bold uppercase text-slate-400 block tracking-wider">{t('adminDashboard.metrics.completionRate')}</p>
             <p className="text-3xl font-bold text-emerald-700 mt-2">
               {completionRate}%
             </p>
@@ -179,7 +181,7 @@ export default function AdminDashboard() {
         {/* Active Cargo */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold uppercase text-slate-400 block tracking-wider">Active in Transit</p>
+            <p className="text-xs font-bold uppercase text-slate-400 block tracking-wider">{t('adminDashboard.metrics.activeTransit')}</p>
             <p className="text-3xl font-bold text-amber-600 mt-2">
               {activeCount}
             </p>
@@ -199,9 +201,9 @@ export default function AdminDashboard() {
           <div>
             <h3 className="text-sm font-bold uppercase text-slate-800 flex items-center gap-2 mb-1">
               <Activity className="w-4 h-4 text-emerald-600" />
-              7-Day Listing Volume Trend
+              {t('adminDashboard.charts.trendTitle')}
             </h3>
-            <p className="text-2xs text-slate-400 mb-4">Total new surplus food listings shared over the last week</p>
+            <p className="text-2xs text-slate-400 mb-4">{t('adminDashboard.charts.trendSub')}</p>
           </div>
           
           <div className="w-full overflow-hidden mt-2">
@@ -266,16 +268,16 @@ export default function AdminDashboard() {
           <div>
             <h3 className="text-sm font-bold uppercase text-slate-800 flex items-center gap-2 mb-1">
               <PieChart className="w-4 h-4 text-emerald-600" />
-              Status Allocation
+              {t('adminDashboard.charts.statusTitle')}
             </h3>
-            <p className="text-2xs text-slate-400 mb-4">Breakdown of current donation workflow states</p>
+            <p className="text-2xs text-slate-400 mb-4">{t('adminDashboard.charts.statusSub')}</p>
           </div>
 
           <div className="space-y-3 pt-2 text-xs">
             {/* Available */}
             <div>
               <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1">
-                <span>Available Listings</span>
+                <span>{t('adminDashboard.charts.statusLabels.available')}</span>
                 <span>{statusCounts.Available}</span>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -289,7 +291,7 @@ export default function AdminDashboard() {
             {/* Accepted */}
             <div>
               <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1">
-                <span>Accepted Claims</span>
+                <span>{t('adminDashboard.charts.statusLabels.accepted')}</span>
                 <span>{statusCounts.Accepted}</span>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -303,7 +305,7 @@ export default function AdminDashboard() {
             {/* Collected */}
             <div>
               <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1">
-                <span>Collected in Transit</span>
+                <span>{t('adminDashboard.charts.statusLabels.collected')}</span>
                 <span>{statusCounts.Collected}</span>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -317,7 +319,7 @@ export default function AdminDashboard() {
             {/* Distributed */}
             <div>
               <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1">
-                <span>Fully Distributed</span>
+                <span>{t('adminDashboard.charts.statusLabels.distributed')}</span>
                 <span>{statusCounts.Distributed}</span>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -340,7 +342,7 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden p-2" id="user-audit-log-panel">
             <div className="p-5 border-b border-gray-100">
               <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                <Users className="w-4 h-4 text-emerald-600" /> Platform User Auditing Logs
+                <Users className="w-4 h-4 text-emerald-600" /> {t('adminDashboard.tables.auditLog')}
               </h2>
             </div>
 
@@ -348,10 +350,10 @@ export default function AdminDashboard() {
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-100 text-slate-400 font-bold uppercase">
-                    <th className="py-4 px-6">Name</th>
-                    <th className="py-4 px-6">Email</th>
-                    <th className="py-4 px-6">Role Package</th>
-                    <th className="py-4 px-6">Location</th>
+                    <th className="py-4 px-6">{t('adminDashboard.tables.headers.name')}</th>
+                    <th className="py-4 px-6">{t('adminDashboard.tables.headers.email')}</th>
+                    <th className="py-4 px-6">{t('adminDashboard.tables.headers.role')}</th>
+                    <th className="py-4 px-6">{t('adminDashboard.tables.headers.location')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-slate-650">
@@ -390,24 +392,24 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6" id="demographics-pie-chart">
             <h2 className="text-sm font-bold uppercase text-slate-800 border-b border-gray-100 pb-3 mb-4 flex items-center gap-1.5 font-medium">
               <Layers className="w-4 h-4 text-emerald-600" />
-              User Demographics
+              {t('adminDashboard.demographics.title')}
             </h2>
             
             <div className="space-y-3.5 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-slate-500 font-medium">Donors (Surplus Handlers)</span>
+                <span className="text-slate-500 font-medium">{t('adminDashboard.demographics.donors')}</span>
                 <span className="font-bold text-slate-850 font-mono bg-gray-50 border border-gray-200 px-2.5 py-0.5 rounded-lg">{totalDonorsCount}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500 font-medium">NGO Partners</span>
+                <span className="text-slate-500 font-medium">{t('adminDashboard.demographics.ngos')}</span>
                 <span className="font-bold text-slate-850 font-mono bg-gray-50 border border-gray-200 px-2.5 py-0.5 rounded-lg">{totalNgosCount}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500 font-medium">Logistics Volunteers</span>
+                <span className="text-slate-500 font-medium">{t('adminDashboard.demographics.volunteers')}</span>
                 <span className="font-bold text-slate-850 font-mono bg-gray-50 border border-gray-200 px-2.5 py-0.5 rounded-lg">{totalVolunteersCount}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500 font-medium">System Administrators</span>
+                <span className="text-slate-500 font-medium">{t('adminDashboard.demographics.admins')}</span>
                 <span className="font-bold text-slate-850 font-mono bg-gray-50 border border-gray-200 px-2.5 py-0.5 rounded-lg">{totalAdminsCount}</span>
               </div>
             </div>
@@ -417,18 +419,18 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6">
             <h2 className="text-sm font-bold uppercase text-slate-800 border-b border-gray-100 pb-3 mb-4 flex items-center gap-1.5 font-medium">
               <Award className="w-4 h-4 text-emerald-600" />
-              Top Categories
+              {t('adminDashboard.categories.title')}
             </h2>
             
             {sortedCategories.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-4">No categories data available.</p>
+              <p className="text-xs text-slate-400 text-center py-4">{t('adminDashboard.categories.noData')}</p>
             ) : (
               <div className="space-y-4 pt-1">
                 {sortedCategories.map(([category, count]) => (
                   <div key={category} className="space-y-1">
                     <div className="flex justify-between text-2xs font-bold text-slate-600">
                       <span>{category}</span>
-                      <span>{count} listings</span>
+                      <span>{count} {t('adminDashboard.categories.listings')}</span>
                     </div>
                     <div className="w-full bg-slate-50 h-1.5 rounded-full overflow-hidden border border-slate-100">
                       <div 

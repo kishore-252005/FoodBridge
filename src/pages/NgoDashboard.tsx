@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { dbService } from '../services/db';
 import { Donation, RequestRecord } from '../types';
 import { 
@@ -18,6 +19,7 @@ import {
 
 export default function NgoDashboard() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [allDonations, setAllDonations] = useState<Donation[]>([]);
   const [allRequests, setAllRequests] = useState<RequestRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +48,7 @@ export default function NgoDashboard() {
       <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 min-h-screen">
         <div className="text-center">
           <Clock className="w-8 h-8 animate-spin text-slate-400 mx-auto mb-3" />
-          <p className="text-sm text-slate-500">Syncing database records...</p>
+          <p className="text-sm text-slate-500">{t('ngoDashboard.loading')}</p>
         </div>
       </div>
     );
@@ -76,8 +78,8 @@ export default function NgoDashboard() {
       {/* Welcoming header banner */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">NGO Partner Hub</h1>
-          <p className="text-slate-500 mt-1">Claim, track, and coordinate redistribution of available meals in your city</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">{t('ngoDashboard.title')}</h1>
+          <p className="text-slate-500 mt-1">{t('ngoDashboard.subtitle')}</p>
         </div>
       </div>
 
@@ -93,7 +95,7 @@ export default function NgoDashboard() {
           }`}
         >
           <Building className="w-4 h-4" />
-          Browse Surplus ({availableDonations.length})
+          {t('ngoDashboard.tabs.available')} ({availableDonations.length})
         </button>
 
         <button
@@ -106,7 +108,7 @@ export default function NgoDashboard() {
           }`}
         >
           <Clock className="w-4 h-4" />
-          Claims Pending ({acceptedDonations.length})
+          {t('ngoDashboard.tabs.claimed')} ({acceptedDonations.length})
         </button>
 
         <button
@@ -119,7 +121,7 @@ export default function NgoDashboard() {
           }`}
         >
           <History className="w-4 h-4" />
-          My History ({donationHistory.length})
+          {t('ngoDashboard.tabs.history')} ({donationHistory.length})
         </button>
       </div>
 
@@ -129,22 +131,22 @@ export default function NgoDashboard() {
           <div className="mb-5 flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-800 tracking-tight flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Surplus Ready to Claim
+              {t('ngoDashboard.availableTab.title')}
             </h2>
             <Link 
               to="/donations" 
               className="text-xs text-emerald-600 font-semibold hover:underline flex items-center gap-1"
             >
-              Advanced Filtering <ArrowRight className="w-3" />
+              {t('ngoDashboard.availableTab.advancedFilter')} <ArrowRight className="w-3" />
             </Link>
           </div>
 
           {availableDonations.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-3xl border border-gray-200 px-6">
               <Building className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-slate-700">No surplus food currently listed</h3>
+              <h3 className="text-base font-semibold text-slate-700">{t('ngoDashboard.availableTab.noSurplusTitle')}</h3>
               <p className="text-xs text-slate-500 max-w-sm mx-auto mt-2.5">
-                Matched area donor resources are empty right now. Active notifications will trigger instantly when donors share surplus food.
+                {t('ngoDashboard.availableTab.noSurplusSub')}
               </p>
             </div>
           ) : (
@@ -163,15 +165,15 @@ export default function NgoDashboard() {
                     
                     <div className="space-y-2 text-xs text-slate-600 pt-3 border-t border-gray-100">
                       <div className="flex justify-between">
-                        <span className="text-slate-400 font-medium">Quantity:</span>
+                        <span className="text-slate-400 font-medium">{t('ngoDashboard.availableTab.quantity')}</span>
                         <span className="font-semibold text-slate-800">{item.quantity}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400 font-medium">Donor:</span>
+                        <span className="text-slate-400 font-medium">{t('ngoDashboard.availableTab.donor')}</span>
                         <span className="font-semibold text-slate-800">{item.donorName}</span>
                       </div>
                       <div className="flex flex-col gap-0.5 pt-1">
-                        <span className="text-slate-400 font-medium">Collection Place:</span>
+                        <span className="text-slate-400 font-medium">{t('ngoDashboard.availableTab.collectionPlace')}</span>
                         <span className="font-medium text-slate-700 truncate block">{item.pickupAddress}</span>
                       </div>
                     </div>
@@ -180,13 +182,13 @@ export default function NgoDashboard() {
                   <div className="p-5 bg-gray-50/75 border-t border-gray-100 flex items-center justify-between">
                     <span className="text-2xs text-amber-600 font-semibold flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5" />
-                      Expires {new Date(item.expiryTime).toLocaleDateString()}
+                      {t('ngoDashboard.availableTab.expires')} {new Date(item.expiryTime).toLocaleDateString()}
                     </span>
                     <Link 
                       to={`/donations/${item.donationId}`}
                       className="px-4 py-1.5 bg-slate-900 border border-slate-950 hover:bg-slate-800 text-white rounded-xl text-3xs font-bold uppercase tracking-wider transition-all"
                     >
-                      Inspect
+                      {t('ngoDashboard.availableTab.inspect')}
                     </Link>
                   </div>
                 </div>
@@ -201,15 +203,15 @@ export default function NgoDashboard() {
         <div id="ngo-claimed-content">
           <h2 className="text-base font-bold text-slate-800 tracking-tight mb-4 flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
-            Claimed Listings in Dispatch
+            {t('ngoDashboard.claimedTab.title')}
           </h2>
 
           {acceptedDonations.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-3xl border border-gray-250 px-6">
               <Clock className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-slate-700">No active pickup operations</h3>
+              <h3 className="text-base font-semibold text-slate-700">{t('ngoDashboard.claimedTab.noActiveTitle')}</h3>
               <p className="text-xs text-slate-500 max-w-sm mx-auto mt-2.5">
-                You haven't claimed or accepted any pending food items yet. Match with available listings to start redistributing.
+                {t('ngoDashboard.claimedTab.noActiveSub')}
               </p>
             </div>
           ) : (
@@ -224,30 +226,30 @@ export default function NgoDashboard() {
                     <span className={`px-2.5 py-1 rounded-full text-2xs font-bold font-mono ${
                       item.status === 'Accepted' ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-amber-50 text-amber-705 border border-amber-100'
                     }`}>
-                      {item.status}
+                      {t(`status.${item.status.toLowerCase()}`)}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 py-3.5 border-t border-gray-100 text-xs text-slate-650">
                     <div>
-                      <span className="text-slate-400 block mb-0.5">Quantity:</span>
+                      <span className="text-slate-400 block mb-0.5">{t('ngoDashboard.claimedTab.quantity')}</span>
                       <span className="font-semibold text-slate-800">{item.quantity}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block mb-0.5">Pickup Address:</span>
+                      <span className="text-slate-400 block mb-0.5">{t('ngoDashboard.claimedTab.pickupAddress')}</span>
                       <span className="font-semibold text-slate-800 truncate block">{item.pickupAddress}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-3.5 border-t border-gray-100">
                     <span className="text-2xs text-slate-400">
-                      Created: {new Date(item.createdAt).toLocaleDateString()}
+                      {t('ngoDashboard.claimedTab.created')} {new Date(item.createdAt).toLocaleDateString()}
                     </span>
                     <Link 
                       to={`/donations/${item.donationId}`}
                       className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 hover:underline"
                     >
-                      Update transit details <ArrowRight className="w-3.5 h-3.5" />
+                      {t('ngoDashboard.claimedTab.updateTransit')} <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
                 </div>
@@ -262,15 +264,15 @@ export default function NgoDashboard() {
         <div id="ngo-history-content">
           <h2 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            Successfully Distributed Listings
+            {t('ngoDashboard.historyTab.title')}
           </h2>
 
           {donationHistory.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-3xl border border-gray-200 px-6">
               <History className="w-12 h-12 text-slate-350 mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-slate-700">No completed delivery records</h3>
+              <h3 className="text-base font-semibold text-slate-700">{t('ngoDashboard.historyTab.noHistoryTitle')}</h3>
               <p className="text-xs text-slate-500 max-w-sm mx-auto mt-2.5">
-                Complete distribution actions or change status values to view metrics on finished donation records here.
+                {t('ngoDashboard.historyTab.noHistorySub')}
               </p>
             </div>
           ) : (
@@ -279,11 +281,11 @@ export default function NgoDashboard() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-100">
-                      <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400">Food Item</th>
-                      <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400">Category</th>
-                      <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400">Quantity</th>
-                      <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400">Donor</th>
-                      <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400">Status</th>
+                      <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400">{t('ngoDashboard.historyTab.table.foodItem')}</th>
+                      <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400">{t('ngoDashboard.historyTab.table.category')}</th>
+                      <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400">{t('ngoDashboard.historyTab.table.quantity')}</th>
+                      <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400">{t('ngoDashboard.historyTab.table.donor')}</th>
+                      <th className="py-4 px-6 text-xs uppercase font-bold text-slate-400">{t('ngoDashboard.historyTab.table.status')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -296,7 +298,7 @@ export default function NgoDashboard() {
                         <td className="py-4 px-6">
                           <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-850 px-2.5 py-1 rounded-full text-2xs font-bold font-mono border border-emerald-100">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            {item.status}
+                            {t(`status.${item.status.toLowerCase()}`)}
                           </span>
                         </td>
                       </tr>
