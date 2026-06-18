@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { authService } from '../services/auth';
 import { dbService } from '../services/db';
 import { UserProfile, UserRole, NotificationItem } from '../types';
+import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -29,8 +31,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    // 2. Request notification permissions from browser if API exists
-    if ('Notification' in window && Notification.permission === 'default') {
+    // 2. Request notification permissions from browser/OS
+    if (Capacitor.isNativePlatform()) {
+      LocalNotifications.requestPermissions().catch(err => console.log('Local notif request error', err));
+    } else if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
 
@@ -87,8 +91,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const notifTitle = "New Nearby Food Donation";
             const notifBody = `"${d.foodName}" (${d.quantity}) is available in your area (${d.area})!`;
             
-            // 1. Trigger HTML5 Native Notification
-            if ('Notification' in window && Notification.permission === 'granted') {
+            // 1. Trigger Native or HTML5 Notification
+            if (Capacitor.isNativePlatform()) {
+              LocalNotifications.schedule({
+                notifications: [
+                  {
+                    title: notifTitle,
+                    body: notifBody,
+                    id: Math.floor(Math.random() * 1000000),
+                    schedule: { at: new Date(Date.now() + 1000) },
+                    actionTypeId: "",
+                    extra: null
+                  }
+                ]
+              }).catch(err => console.error("Local notification error", err));
+            } else if ('Notification' in window && Notification.permission === 'granted') {
               try {
                 new Notification(notifTitle, { 
                   body: notifBody, 
